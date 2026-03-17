@@ -1,28 +1,445 @@
-name: Gemini File Creator
+name: 🤖 УНИВЕРСАЛЬНЫЙ AI КОНСТРУКТОР v3.0
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      project_type:
+        description: 'Тип проекта (auto/poppy/minecraft/android/web/python)'
+        default: 'auto'
+      project_name:
+        description: 'Название проекта'
+        required: true
+        default: 'MyAwesomeProject'
 
 jobs:
-  create-file:
-    if: contains(github.event.issue.body, '@gemini')
+  universal-creator:
+    if: |
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@create')) ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@create')) ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
+    permissions: write-all
+    
     steps:
-      - name: Checkout repository
+      - name: 📥 Забираем код
         uses: actions/checkout@v4
-      
-      - name: Create file
+
+      - name: 🔧 Установка всего необходимого
         run: |
-          echo "Привет! Файл создан $(date)" > test.txt
-      
-      - name: Commit changes
+          # Java для Minecraft/Android модов
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk gradle maven
+          
+          # Python для скриптов и AI
+          pip install --upgrade pip
+          pip install google-generativeai pillow numpy pygame
+          
+          # Инструменты для рендеринга
+          sudo apt-get install -y imagemagick ffmpeg
+          
+          # Node.js для веб-проектов
+          curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          
+          # Android SDK (если нужно)
+          wget https://dl.google.com/android/repository/commandlinetools-linux-latest.zip
+          unzip commandlinetools-linux-latest.zip -d android-sdk
+          export ANDROID_SDK_ROOT=$PWD/android-sdk
+
+      - name: 🧠 Запускаем ВЕЛИКИЙ РАЗУМ
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          git config --global user.name 'Gemini Bot'
-          git config --global user.email 'gemini-bot@users.noreply.github.com'
-          git add test.txt
-          git commit -m "Автоматическое создание файла"
-          git push
+          python - <<'EOF'
+          import os
+          import sys
+          import json
+          import base64
+          import google.generativeai as genai
+          from datetime import datetime
+          import subprocess
+          
+          # Настройка Gemini 2.0 Flash (самый умный и быстрый)
+          genai.configure(api_key=os.environ['GEMINI_API_KEY'])
+          model = genai.GenerativeModel('gemini-2.0-flash-exp')
+          
+          # Получаем задание
+          task = """
+          ${{ github.event.issue.body || github.event.comment.body || 'Создать проект' }}
+          """
+          
+          print("🔮 Анализирую запрос пользователя...")
+          print(f"📝 Задача: {task[:100]}...")
+          
+          # СУПЕР-ПРОМПТ для создания ЛЮБОГО проекта
+          prompt = f"""
+          ТЫ - АБСОЛЮТНЫЙ МАСТЕР КОДА, МОДОВ, ИГР И ГРАФИКИ!
+          
+          ЗАДАНИЕ ПОЛЬЗОВАТЕЛЯ:
+          {task}
+          
+          ТИПЫ ПРОЕКТОВ КОТОРЫЕ ТЫ УМЕЕШЬ СОЗДАВАТЬ:
+          
+          1️⃣ POOPY PLAYTIME MODS (Lua)
+             - Создание текстур (PNG)
+             - 3D модели (в формате .obj или указаниями)
+             - Худы (HUD) на Lua
+             - Клик-GUI меню
+             - Рендеринг через кастомные шейдеры
+             - Анимации монстров
+             - Звуки и музыку
+          
+          2️⃣ MINECRAFT MODS (Java + Gradle)
+             - Моды на Forge/Fabric/Paper
+             - Кастомные блоки и предметы
+             - Текстуры 16x, 32x, 64x
+             - GUI интерфейсы
+             - Рендеринг через OpenGL
+             - Анимации
+          
+          3️⃣ ANDROID GAMES/APPS (Kotlin/Java)
+             - Полноценные приложения
+             - Игры с графикой
+             - Кастомный рендеринг
+             - OpenGL ES
+          
+          4️⃣ PYTHON ПРОЕКТЫ
+             - Игры на Pygame
+             - GUI приложения (Tkinter, PyQt)
+             - Telegram/Discord боты
+             - Рендеринг через OpenCV
+          
+          5️⃣ WEB ПРОЕКТЫ
+             - Сайты с CSS анимацией
+             - 3D на Three.js
+             - Canvas рендеринг
+             - Игры на JavaScript
+          
+          6️⃣ UNITY PROJECTS (C#)
+             - Скрипты для Unity
+             - Шейдеры
+             - UI элементы
+          
+          ЧТО ТЫ ДОЛЖЕН СДЕЛАТЬ:
+          
+          1. ОПРЕДЕЛИ ТИП ПРОЕКТА из запроса пользователя
+          2. СОЗДАЙ ПОЛНУЮ СТРУКТУРУ:
+             - Все папки (src, assets, textures, models, sounds, gui)
+             - Все конфиги (build.gradle, package.json, settings.ini)
+          
+          3. НАПИШИ ВЕСЬ КОД:
+             - Основная логика
+             - Рендеринг (если нужно)
+             - GUI элементы
+             - Худы (HUD)
+             - Текстурки (создай base64 PNG)
+             - Звуковые эффекты (описания)
+          
+          4. ДЛЯ ГРАФИКИ:
+             - Если нужны текстуры - создай их через base64
+             - Если нужны 3D модели - опиши как создать
+             - Если нужны шейдеры - напиши их код
+          
+          5. ДЛЯ GUI:
+             - Создай кликабельные элементы
+             - Кнопки, слайдеры, меню
+             - Анимации интерфейса
+          
+          ОТВЕТ ДАЙ ТОЛЬКО PYTHON КОДОМ, который создаст все файлы.
+          
+          ПРИМЕР для Poppy мода с HUD и текстурами:
+          ```python
+          # Создаём папки
+          os.makedirs('Mods/MyMod/Content/Textures/HUD', exist_ok=True)
+          os.makedirs('Mods/MyMod/Content/GUI', exist_ok=True)
+          
+          # Создаём текстуру (base64)
+          with open('Mods/MyMod/Content/Textures/HUD/health_bar.png', 'wb') as f:
+              f.write(base64.b64decode('iVBORw0KGgoAAAANSUhEUgAA...'))
+          
+          # Создаём Lua код для худа
+          with open('Mods/MyMod/HUD.lua', 'w') as f:
+              f.write('''
+          function DrawHUD()
+              -- Рисуем здоровье
+              drawTexture("health_bar.png", 10, 10, 200, 20)
+              -- Рисуем счетчик патронов
+              drawText("Ammo: " .. ammo, 10, 40)
+          end
+              ''')
+          
+          # Создаём GUI меню
+          with open('Mods/MyMod/GUI/MainMenu.lua', 'w') as f:
+              f.write('''
+          function CreateMainMenu()
+              local menu = {}
+              menu.buttons = {
+                  {text="Start Game", x=100, y=100, callback=StartGame},
+                  {text="Options", x=100, y=150, callback=OpenOptions},
+                  {text="Exit", x=100, y=200, callback=ExitGame}
+              }
+              return menu
+          end
+              ''')
+          ```
+          
+          ТЕПЕРЬ СОЗДАЙ АХУЕННЫЙ ПРОЕКТ ИСХОДЯ ИЗ ЗАДАНИЯ ПОЛЬЗОВАТЕЛЯ!
+          """
+          
+          print("🎨 Генерирую проект...")
+          response = model.generate_content(prompt)
+          
+          # Сохраняем код генератора
+          with open('_generator.py', 'w') as f:
+              f.write(response.text)
+          
+          # Запускаем создание проекта
+          print("⚙️ Создаю файлы проекта...")
+          exec(response.text)
+          
+          # Создаём отчёт
+          report = {
+              'project_name': '${{ inputs.project_name || github.event.issue.title }}',
+              'created_at': str(datetime.now()),
+              'files': [],
+              'folders': []
+          }
+          
+          for root, dirs, files in os.walk('.'):
+              for d in dirs:
+                  report['folders'].append(os.path.join(root, d))
+              for f in files:
+                  report['files'].append(os.path.join(root, f))
+          
+          with open('project_report.json', 'w') as f:
+              json.dump(report, f, indent=2)
+          
+          print("✅ Проект готов!")
+          EOF
+
+      - name: 🖼️ Генерация превью проекта
+        run: |
+          cat > preview.html <<EOF
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Project Preview</title>
+            <style>
+              body { 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                font-family: 'Arial', sans-serif;
+                margin: 0;
+                padding: 20px;
+                color: white;
+              }
+              .container {
+                max-width: 1200px;
+                margin: 0 auto;
+              }
+              .header {
+                text-align: center;
+                padding: 40px;
+                background: rgba(255,255,255,0.1);
+                border-radius: 20px;
+                margin-bottom: 30px;
+              }
+              .project-info {
+                background: rgba(255,255,255,0.2);
+                border-radius: 15px;
+                padding: 30px;
+                margin-bottom: 30px;
+              }
+              .preview-box {
+                background: rgba(0,0,0,0.3);
+                border-radius: 10px;
+                padding: 20px;
+                margin: 10px 0;
+              }
+              .stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin: 30px 0;
+              }
+              .stat-card {
+                background: rgba(255,255,255,0.1);
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+              }
+              .stat-number {
+                font-size: 36px;
+                font-weight: bold;
+                color: #ffd700;
+              }
+              .file-list {
+                max-height: 300px;
+                overflow-y: auto;
+                background: rgba(0,0,0,0.2);
+                border-radius: 10px;
+                padding: 15px;
+              }
+              .file-item {
+                padding: 5px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+              }
+              @keyframes glow {
+                0% { box-shadow: 0 0 5px #ffd700; }
+                50% { box-shadow: 0 0 20px #ffd700; }
+                100% { box-shadow: 0 0 5px #ffd700; }
+              }
+              .preview-box:hover {
+                animation: glow 2s infinite;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>🚀 PROJECT CREATED SUCCESSFULLY</h1>
+                <p>Your project is ready to use!</p>
+              </div>
+              
+              <div class="project-info">
+                <h2>📊 Project Statistics</h2>
+                <div class="stats">
+                  <div class="stat-card">
+                    <div class="stat-number" id="fileCount">0</div>
+                    <div>Files Created</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-number" id="folderCount">0</div>
+                    <div>Folders Created</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-number" id="projectType">AI</div>
+                    <div>Project Type</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="preview-box">
+                <h3>📁 Project Structure</h3>
+                <div class="file-list" id="fileList">
+                  Loading...
+                </div>
+              </div>
+              
+              <div class="preview-box">
+                <h3>🎮 Quick Start</h3>
+                <pre style="background: #333; padding: 15px; border-radius: 5px;">
+1. Clone this repository
+2. Check the project structure
+3. Run the project according to its type
+4. Enjoy! 🎉
+                </pre>
+              </div>
+            </div>
+            
+            <script>
+              fetch('project_report.json')
+                .then(r => r.json())
+                .then(data => {
+                  document.getElementById('fileCount').textContent = data.files.length;
+                  document.getElementById('folderCount').textContent = data.folders.length;
+                  
+                  const fileList = document.getElementById('fileList');
+                  fileList.innerHTML = '';
+                  [...data.folders, ...data.files].forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'file-item';
+                    div.textContent = item;
+                    fileList.appendChild(div);
+                  });
+                });
+            </script>
+          </body>
+          </html>
+          EOF
+
+      - name: 📦 Коммитим и пушим
+        run: |
+          git config --global user.name 'Universal AI Creator'
+          git config --global user.email 'ai@creator.space'
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "✨ Universal AI Creator - Project Generated"
+          git push || true
+
+      - name: 💬 Создаём эпичный комментарий
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.existsSync('project_report.json') ? 
+              JSON.parse(fs.readFileSync('project_report.json')) : 
+              { files: [], folders: [] };
+            
+            let comment = `# 🚀 **UNIVERSAL AI CONSTRUCTOR v3.0**\n\n`;
+            comment += `## ✅ **ПРОЕКТ УСПЕШНО СОЗДАН!**\n\n`;
+            
+            comment += `### 📊 **Статистика:**\n`;
+            comment += `- 📁 Папок создано: **${report.folders.length}**\n`;
+            comment += `- 📄 Файлов создано: **${report.files.length}**\n`;
+            comment += `- ⏰ Время создания: **${new Date().toLocaleString()}**\n\n`;
+            
+            comment += `### 🎮 **Что можно делать:**\n`;
+            comment += `- \`@create сделай Poppy мод с крутым HUD и текстурами\`\n`;
+            comment += `- \`@create Minecraft мод с GUI меню и рендерингом\`\n`;
+            comment += `- \`@create Android игру с 3D графикой\`\n`;
+            comment += `- \`@create Telegram бота с клавиатурой и картинками\`\n`;
+            comment += `- \`@create сайт с анимациями и Canvas\`\n\n`;
+            
+            comment += `### 🔥 **Примеры для Poppy мода:**\n`;
+            comment += '```\n';
+            comment += `@create сделай Poppy мод где:\n`;
+            comment += `- Есть хп бар сверху экрана\n`;
+            comment += `- Красивое GUI меню с кнопками\n`;
+            comment += `- Новый монстр с текстурой\n`;
+            comment += `- Счетчик патронов\n`;
+            comment += `- Миникарта\n`;
+            comment += '```\n\n';
+            
+            comment += `### 📁 **Структура проекта:**\n`;
+            comment += '```\n';
+            const all = [...report.folders, ...report.files];
+            all.slice(0, 20).forEach(item => {
+              comment += `${item}\n`;
+            });
+            if (all.length > 20) comment += `... и ещё ${all.length - 20} файлов\n`;
+            comment += '```\n';
+            
+            comment += `\n---\n`;
+            comment += `*🤖 Создано с любовью через Gemini AI и GitHub Actions*\n`;
+            comment += `*⭐ Поставь звезду если норм получилось!*`;
+            
+            if (context.payload.issue || context.payload.comment) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+      - name: 🎉 Финальное сообщение
+        run: |
+          echo "╔════════════════════════════════════════════════════════════╗"
+          echo "║         УНИВЕРСАЛЬНЫЙ AI КОНСТРУКТОР v3.0                ║"
+          echo "╠════════════════════════════════════════════════════════════╣"
+          echo "║  ✅ Проект создан!                                         ║"
+          echo "║  🎮 Можно юзать для:                                       ║"
+          echo "║     • Poppy Playtime модов с HUD/GUI                       ║"
+          echo "║     • Minecraft модов с текстурами                         ║"
+          echo "║     • Android игр с рендерингом                            ║"
+          echo "║     • Веб-проектов с анимациями                            ║"
+          echo "║     • Telegram/Discord ботов                               ║"
+          echo "║     • И вообще всего что угодно!                           ║"
+          echo "║                                                             ║"
+          echo "║  🚀 Просто напиши в Issue: @create [что хочешь]            ║"
+          echo "║                                                             ║"
+          echo "║  💡 Пример: @create сделай Poppy мод с хп баром и меню     ║"
+          echo "╚════════════════════════════════════════════════════════════╝"
