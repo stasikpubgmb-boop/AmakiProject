@@ -1,0 +1,28 @@
+name: Gemini File Creator
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-file:
+    if: contains(github.event.issue.body, '@gemini')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Create file
+        run: |
+          echo "Привет! Файл создан $(date)" > test.txt
+      
+      - name: Commit changes
+        run: |
+          git config --global user.name 'Gemini Bot'
+          git config --global user.email 'gemini-bot@users.noreply.github.com'
+          git add test.txt
+          git commit -m "Автоматическое создание файла"
+          git push
