@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "amakiproject",
+	"version": "${version}",
+	"name": "AmakiProject",
+	"description": "Premium utility mod with professional ClickGUI",
+	"authors": [
+		"Amaki Team"
+	],
+	"contact": {},
+	"license": "MIT",
+	"icon": "assets/amakiproject/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.amaki.AmakiProject"
+		]
+	},
+	"mixins": [],
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
